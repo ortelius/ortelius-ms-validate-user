@@ -1,0 +1,54 @@
+openapi: 3.0.1
+info:
+  title: ortelius-ms-validate-user
+  description: '<a href="https://github.com/ortelius/ortelius-ms-validate-user">Check on GitHub</a>'
+  contact:
+    email: steve@deployhub.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Ortelius
+  url: https://ortelius.io/
+servers:
+- url: /
+tags:
+- name: validateuser
+paths:
+  '/msapi/validateuser':
+    get:
+      tags:
+        - validateuser
+      summary: Validates user and active login for the JWT token passed as a cookie.
+      operationId: validateuser
+      parameters:
+      - name: token
+        in: cookie
+        description: Cookie containing the JWT token created as part of the /dmadminweb/API/login
+        schema:
+          type: string
+      - name: domains
+        in: query
+        required: false
+        description: Y/N to include the users domains as part of the JSON return string
+        schema:
+          type: string
+      responses:
+        "200":
+          description: User is valid and has active login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Api-Response'
+              example: 
+                "[2001, 2002, 1]"
+        '401':
+          description: Unauthorized user.  Not a valid userid or active login.
+
+components:
+  schemas:
+    Api-Response:
+      type: array
+      items:
+        type: integer
