@@ -1,4 +1,4 @@
-FROM quay.io/ortelius/ms-python-base:flask-1.0
+FROM quay.io/ortelius/ms-python-base:fastapi-1.0 as base
 
 ENV DB_HOST localhost
 ENV DB_NAME postgres
@@ -12,6 +12,3 @@ COPY main.py /app
 COPY requirements.txt /app
 RUN pip install -r requirements.txt; \
 python -m pip uninstall -y pip;
-
-#Run example:
-# docker run -it -e DB_HOST=192.168.10.96 -e DB_PORT=6543 -p 6161:80 a0f1439236fb
