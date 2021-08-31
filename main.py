@@ -92,7 +92,7 @@ class Message(BaseModel):
 
 
 class DomainList(BaseModel):
-    domains: List[int] = None
+    domains: List[int] = list()
 
 
 @app.get('/msapi/validateuser',
@@ -155,7 +155,7 @@ async def validateuser(request: Request, domains: Optional[str] = Query(None, re
         cursor.close()         # close the cursor so don't have a connection leak
         conn.commit()          # commit the delete and free up lock
 
-        params = (userid, uuid, )   # setup parameters to count(*) query
+        params = tuple([userid, uuid])   # setup parameters to count(*) query
         cursor = conn.cursor()      # init cursor
         cursor.execute(sql, params)  # run the query
 
@@ -169,7 +169,7 @@ async def validateuser(request: Request, domains: Optional[str] = Query(None, re
         if (rowcnt > 0):            # > 0 means that user is authorized
             authorized = True       # set authorization to True
             usql = "update dm.dm_user_auth set lastseen = current_timestamp where id = (%s) and jti = (%s)"  # sql to update the last seen timestamp
-            params = (userid, uuid, )       # setup parameters to update query
+            params = tuple([userid, uuid])       # setup parameters to update query
             cursor = conn.cursor()          # init cursor
             cursor.execute(usql, params)    # run the query
             cursor.close()                  # close the cursor so don't have a connection leak
@@ -183,7 +183,7 @@ async def validateuser(request: Request, domains: Optional[str] = Query(None, re
             domainid = -1
             sql = "SELECT domainid FROM dm.dm_user WHERE id = (%s)"
             cursor = conn.cursor()  # init cursor
-            params = (userid, )
+            params = tuple([userid])
             cursor.execute(sql, params)
             row = cursor.fetchone()
             while row:
@@ -216,7 +216,7 @@ async def validateuser(request: Request, domains: Optional[str] = Query(None, re
                                 WHERE id = (%s) OR (%s) = ANY(parents.ancestry)) AS CT(c)"""
 
             cursor = conn.cursor()  # init cursor
-            params = (domainid, domainid, )
+            params = tuple([domainid, domainid])
             cursor.execute(sql, params)
             row = cursor.fetchone()
             while row:
