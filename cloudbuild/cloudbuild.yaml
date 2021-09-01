@@ -4,10 +4,10 @@ steps:
     entrypoint: 'bash'
     args: ['-c', 'ls -A1 | xargs rm -rf;git clone $$COMPONENT_GITURL .;git checkout --track -b $BRANCH_NAME origin/$BRANCH_NAME;env | sed "s/^/export /" >> /workspace/cloudbuild.sh']
     env: 
-      - 'COMPONENT_GITURL=https://github.com/ortelius/ortelius-ms-rpt-env2app'
+      - 'COMPONENT_GITURL=https://github.com/ortelius/ortelius-ms-validate-user'
       - 'COMPONENT_VERSION=9.0.0'
       - 'COMPONENT_VARIANT=$BRANCH_NAME'
-      - 'COMPONENT_DOCKERREPO=quay.io/ortelius/ms-rpt-env2app'
+      - 'COMPONENT_DOCKERREPO=quay.io/ortelius/ms-validate-user'
       - 'BLDDATE=`date`'
       - 'IMAGE_TAG="$BRANCH_NAME-v$$COMPONENT_VERSION.$$(git rev-list --count $BRANCH_NAME)-g$SHORT_SHA"'
 
@@ -20,7 +20,7 @@ steps:
     env:
       - 'DOCKER_CONFIG=/workspace/docker-config'
 
-  # Build and push deployhub-webadmin.war - quay.io/ortelius/ms-rpt-env2app
+  # Build and push deployhub-webadmin.war - quay.io/ortelius/ms-validate-user
   - name: 'gcr.io/cloud-builders/docker'
     id: ortelius
     waitFor: [ 'login' ]

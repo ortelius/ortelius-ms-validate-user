@@ -1,0 +1,7 @@
+# cryptography - installed by base image
+# FastApi - installed by base image
+# psycopg2 - installed by base image
+# PyJWT==2.0.1 - installed by base image
+# sqlalchemy==1.4.22 - installed by base image
+pybreaker==0.6.0
+pydantic==1.8.2
