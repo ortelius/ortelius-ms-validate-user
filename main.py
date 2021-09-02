@@ -133,78 +133,79 @@ async def validateuser(request: Request, domains: Optional[str] = Query(None, re
             csql = "DELETE from dm.dm_user_auth where lastseen < current_timestamp - interval '1 hours'"  # remove stale logins
             sql = "select count(*) from dm.dm_user_auth where id = (%s) and jti = (%s)"  # see if the user id authorized
 
+            cursor = conn.cursor()  # init cursor
+            cursor.execute(csql)   # exec delete query
+            cursor.close()         # close the cursor so don't have a connection leak
+            conn.commit()          # commit the delete and free up lock
+
+            params = tuple([userid, uuid])   # setup parameters to count(*) query
+            cursor = conn.cursor()      # init cursor
+            cursor.execute(sql, params)  # run the query
+
+            row = cursor.fetchone()     # fetch a row
+            rowcnt = 0                  # init counter
+            while row:                  # loop until there are no more rows
+                rowcnt = row[0]         # get the 1st column data
+                row = cursor.fetchone()  # get the next row
+            cursor.close()              # close the cursor so don't have a connection leak
+
+            if (rowcnt > 0):            # > 0 means that user is authorized
+                authorized = True       # set authorization to True
+                usql = "update dm.dm_user_auth set lastseen = current_timestamp where id = (%s) and jti = (%s)"  # sql to update the last seen timestamp
+                params = tuple([userid, uuid])       # setup parameters to update query
+                cursor = conn.cursor()          # init cursor
+                cursor.execute(usql, params)    # run the query
+                cursor.close()                  # close the cursor so don't have a connection leak
+                conn.commit()                   # commit the update and free up lock
+
+            if (not authorized):       # fail API call if not authorized
+                conn.close()
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization Failed")
+
             if (domains is not None and domains.lower() == 'y'):    # get the list of domains for the user if domains=Y
                 domainid = -1
                 sql = "SELECT domainid FROM dm.dm_user WHERE id = (%s)"
                 cursor = conn.cursor()  # init cursor
-                cursor.execute(csql)   # exec delete query
-                cursor.close()         # close the cursor so don't have a connection leak
-                conn.commit()          # commit the delete and free up lock
-
-                params = tuple([userid, uuid])   # setup parameters to count(*) query
-                cursor = conn.cursor()      # init cursor
-                cursor.execute(sql, params)  # run the query
-
-                row = cursor.fetchone()     # fetch a row
-                rowcnt = 0                  # init counter
-                while row:                  # loop until there are no more rows
-                    rowcnt = row[0]         # get the 1st column data
-                    row = cursor.fetchone()  # get the next row
-                cursor.close()              # close the cursor so don't have a connection leak
-
-                if (rowcnt > 0):            # > 0 means that user is authorized
-                    authorized = True       # set authorization to True
-                    usql = "update dm.dm_user_auth set lastseen = current_timestamp where id = (%s) and jti = (%s)"  # sql to update the last seen timestamp
-                    params = tuple([userid, uuid])       # setup parameters to update query
-                    cursor = conn.cursor()          # init cursor
-                    cursor.execute(usql, params)    # run the query
-                    cursor.close()                  # close the cursor so don't have a connection leak
-                    conn.commit()                   # commit the update and free up lock
-
-                if (not authorized):       # fail API call if not authorized
-                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization Failed")
-
-                if (domains is not None and domains.lower() == 'y'):    # get the list of domains for the user if domains=Y
-                    domainid = -1
-                    sql = "SELECT domainid FROM dm.dm_user WHERE id = (%s)"
-                    cursor = conn.cursor()  # init cursor
-                    params = tuple([userid])
-                    cursor.execute(sql, params)
+                params = tuple([userid])
+                cursor.execute(sql, params)
+                row = cursor.fetchone()
+                while row:
+                    domainid = row[0]
                     row = cursor.fetchone()
-                    cursor.close()
+                cursor.close()
 
-                    sql = """WITH RECURSIVE parents AS
-                                (SELECT
-                                        id              AS id,
-                                        ARRAY [id]      AS ancestry,
-                                        NULL :: INTEGER AS parent,
-                                        id              AS start_of_ancestry
-                                    FROM dm.dm_domain
-                                    WHERE
-                                        domainid IS NULL and status = 'N'
-                                    UNION
-                                    SELECT
-                                        child.id                                    AS id,
-                                        array_append(p.ancestry, child.id)          AS ancestry,
-                                        child.domainid                              AS parent,
-                                        coalesce(p.start_of_ancestry, child.domainid) AS start_of_ancestry
-                                    FROM dm.dm_domain child
-                                        INNER JOIN parents p ON p.id = child.domainid AND child.status = 'N'
-                                    )
-                                    SELECT ARRAY_AGG(c)
-                                    FROM
-                                    (SELECT DISTINCT UNNEST(ancestry)
-                                        FROM parents
-                                        WHERE id = (%s) OR (%s) = ANY(parents.ancestry)) AS CT(c)"""
+                sql = """WITH RECURSIVE parents AS
+                            (SELECT
+                                    id              AS id,
+                                    ARRAY [id]      AS ancestry,
+                                    NULL :: INTEGER AS parent,
+                                    id              AS start_of_ancestry
+                                FROM dm.dm_domain
+                                WHERE
+                                    domainid IS NULL and status = 'N'
+                                UNION
+                                SELECT
+                                    child.id                                    AS id,
+                                    array_append(p.ancestry, child.id)          AS ancestry,
+                                    child.domainid                              AS parent,
+                                    coalesce(p.start_of_ancestry, child.domainid) AS start_of_ancestry
+                                FROM dm.dm_domain child
+                                    INNER JOIN parents p ON p.id = child.domainid AND child.status = 'N'
+                                )
+                                SELECT ARRAY_AGG(c)
+                                FROM
+                                (SELECT DISTINCT UNNEST(ancestry)
+                                    FROM parents
+                                    WHERE id = (%s) OR (%s) = ANY(parents.ancestry)) AS CT(c)"""
 
-                    cursor = conn.cursor()  # init cursor
-                    params = tuple([domainid, domainid])
-                    cursor.execute(sql, params)
+                cursor = conn.cursor()  # init cursor
+                params = tuple([domainid, domainid])
+                cursor.execute(sql, params)
+                row = cursor.fetchone()
+                while row:
+                    result = row[0]
                     row = cursor.fetchone()
-                    while row:
-                        result = row[0]
-                        row = cursor.fetchone()
-                    cursor.close()
+            conn.close()
         return {"domains": result}
 
     except HTTPException:
