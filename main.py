@@ -205,7 +205,7 @@ async def validateuser(request: Request, domains: Optional[str] = Query(None, re
                         result = row[0]
                         row = cursor.fetchone()
                     cursor.close()
-            return {"domains": result}
+        return {"domains": result}
 
     except HTTPException:
         raise
