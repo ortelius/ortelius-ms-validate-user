@@ -1,5 +1,5 @@
 apiVersion: v2
-name: rpt-env2app
+name: ms-validate-user
 description: Dependency Packages
 type: application
 version: 0.1.0

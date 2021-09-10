@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{ include "ms-validate-user.name" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app:  {{ include "ms-validate-user.name" . }}
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app:  {{ include "ms-validate-user.name" . }}
+        tier: backend
+        track: stable
+    spec:
+      containers:
+        - name: {{ include "ms-validate-user.name" . }}
+          image: "{{ .Values.DockerRepo }}:{{ .Values.DockerTag }}"
+          imagePullPolicy: Always
+          env:
+            - name: RSA_FILE
+              value: /app/ssh/ortelius_rsa.pub
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: pgcred
+                  key: DBUserName
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: pgcred
+                  key: DBPassword
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: pgcred
+                  key: DBHost
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: pgcred
+                  key: DBPort
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: pgcred
+                  key: DBName
+          ports:
+            - name: http
+              containerPort: 80
+          volumeMounts:
+            - name: ssh-volume
+              mountPath: /app/ssh
+      volumes:
+        - name: ssh-volume
+          secret:
+            secretName: rsa-pub-secret
+---   
