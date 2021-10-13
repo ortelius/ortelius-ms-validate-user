@@ -6,9 +6,13 @@ import psycopg2
 from sqlalchemy import create_engine
 from fastapi import FastAPI, Query, Request, Response, HTTPException, status
 from pydantic import BaseModel
+from sqlalchemy.exc import OperationalError, StatementError
+from time import sleep
+import logging
 
 # Init Globals
 service_name = 'ortelius-ms-validate-user'
+db_conn_retry = 3
 
 # Init FastAPI
 app = FastAPI()
@@ -22,7 +26,7 @@ db_port = os.getenv("DB_PORT", "5432")
 id_rsa_pub = os.getenv("RSA_FILE", "ortelius_rsa.pub")
 public_key = open(id_rsa_pub, 'r').read()
 
-engine = create_engine("postgresql+psycopg2://" + db_user + ":" + db_pass + "@" + db_host + "/" + db_name)
+engine = create_engine("postgresql+psycopg2://" + db_user + ":" + db_pass + "@" + db_host + "/" + db_name, pool_pre_ping=True)
 
 
 class StatusMsg(BaseModel):
@@ -126,87 +130,108 @@ async def validateuser(request: Request, domains: Optional[str] = Query(None, re
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(err)) from None
 
     try:
-        with engine.connect() as connection:
-            conn = connection.connection
-            authorized = False      # init to not authorized
-
-            csql = "DELETE from dm.dm_user_auth where lastseen < current_timestamp - interval '1 hours'"  # remove stale logins
-            sql = "select count(*) from dm.dm_user_auth where id = (%s) and jti = (%s)"  # see if the user id authorized
-
-            cursor = conn.cursor()  # init cursor
-            cursor.execute(csql)   # exec delete query
-            cursor.close()         # close the cursor so don't have a connection leak
-            conn.commit()          # commit the delete and free up lock
-
-            params = tuple([userid, uuid])   # setup parameters to count(*) query
-            cursor = conn.cursor()      # init cursor
-            cursor.execute(sql, params)  # run the query
-
-            row = cursor.fetchone()     # fetch a row
-            rowcnt = 0                  # init counter
-            while row:                  # loop until there are no more rows
-                rowcnt = row[0]         # get the 1st column data
-                row = cursor.fetchone()  # get the next row
-            cursor.close()              # close the cursor so don't have a connection leak
-
-            if (rowcnt > 0):            # > 0 means that user is authorized
-                authorized = True       # set authorization to True
-                usql = "update dm.dm_user_auth set lastseen = current_timestamp where id = (%s) and jti = (%s)"  # sql to update the last seen timestamp
-                params = tuple([userid, uuid])       # setup parameters to update query
-                cursor = conn.cursor()          # init cursor
-                cursor.execute(usql, params)    # run the query
-                cursor.close()                  # close the cursor so don't have a connection leak
-                conn.commit()                   # commit the update and free up lock
-
-            if (not authorized):       # fail API call if not authorized
-                conn.close()
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization Failed")
-
-            if (domains is not None and domains.lower() == 'y'):    # get the list of domains for the user if domains=Y
-                domainid = -1
-                sql = "SELECT domainid FROM dm.dm_user WHERE id = (%s)"
-                cursor = conn.cursor()  # init cursor
-                params = tuple([userid])
-                cursor.execute(sql, params)
-                row = cursor.fetchone()
-                while row:
-                    domainid = row[0]
-                    row = cursor.fetchone()
-                cursor.close()
-
-                sql = """WITH RECURSIVE parents AS
-                            (SELECT
-                                    id              AS id,
-                                    ARRAY [id]      AS ancestry,
-                                    NULL :: INTEGER AS parent,
-                                    id              AS start_of_ancestry
-                                FROM dm.dm_domain
-                                WHERE
-                                    domainid IS NULL and status = 'N'
-                                UNION
-                                SELECT
-                                    child.id                                    AS id,
-                                    array_append(p.ancestry, child.id)          AS ancestry,
-                                    child.domainid                              AS parent,
-                                    coalesce(p.start_of_ancestry, child.domainid) AS start_of_ancestry
-                                FROM dm.dm_domain child
-                                    INNER JOIN parents p ON p.id = child.domainid AND child.status = 'N'
-                                )
-                                SELECT ARRAY_AGG(c)
-                                FROM
-                                (SELECT DISTINCT UNNEST(ancestry)
-                                    FROM parents
-                                    WHERE id = (%s) OR (%s) = ANY(parents.ancestry)) AS CT(c)"""
-
-                cursor = conn.cursor()  # init cursor
-                params = tuple([domainid, domainid])
-                cursor.execute(sql, params)
-                row = cursor.fetchone()
-                while row:
-                    result = row[0]
-                    row = cursor.fetchone()
-            conn.close()
-        return {"domains": result}
+        #Retry logic for failed query
+        no_of_retry = db_conn_retry
+        attempt = 1;
+        while True:
+            try:
+                with engine.connect() as connection:
+                    conn = connection.connection
+                    authorized = False      # init to not authorized
+        
+                    csql = "DELETE from dm.dm_user_auth where lastseen < current_timestamp - interval '1 hours'"  # remove stale logins
+                    sql = "select count(*) from dm.dm_user_auth where id = (%s) and jti = (%s)"  # see if the user id authorized
+        
+                    cursor = conn.cursor()  # init cursor
+                    cursor.execute(csql)   # exec delete query
+                    cursor.close()         # close the cursor so don't have a connection leak
+                    conn.commit()          # commit the delete and free up lock
+        
+                    params = tuple([userid, uuid])   # setup parameters to count(*) query
+                    cursor = conn.cursor()      # init cursor
+                    cursor.execute(sql, params)  # run the query
+        
+                    row = cursor.fetchone()     # fetch a row
+                    rowcnt = 0                  # init counter
+                    while row:                  # loop until there are no more rows
+                        rowcnt = row[0]         # get the 1st column data
+                        row = cursor.fetchone()  # get the next row
+                    cursor.close()              # close the cursor so don't have a connection leak
+        
+                    if (rowcnt > 0):            # > 0 means that user is authorized
+                        authorized = True       # set authorization to True
+                        usql = "update dm.dm_user_auth set lastseen = current_timestamp where id = (%s) and jti = (%s)"  # sql to update the last seen timestamp
+                        params = tuple([userid, uuid])       # setup parameters to update query
+                        cursor = conn.cursor()          # init cursor
+                        cursor.execute(usql, params)    # run the query
+                        cursor.close()                  # close the cursor so don't have a connection leak
+                        conn.commit()                   # commit the update and free up lock
+        
+                    if (not authorized):       # fail API call if not authorized
+                        conn.close()
+                        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization Failed")
+        
+                    if (domains is not None and domains.lower() == 'y'):    # get the list of domains for the user if domains=Y
+                        domainid = -1
+                        sql = "SELECT domainid FROM dm.dm_user WHERE id = (%s)"
+                        cursor = conn.cursor()  # init cursor
+                        params = tuple([userid])
+                        cursor.execute(sql, params)
+                        row = cursor.fetchone()
+                        while row:
+                            domainid = row[0]
+                            row = cursor.fetchone()
+                        cursor.close()
+        
+                        sql = """WITH RECURSIVE parents AS
+                                    (SELECT
+                                            id              AS id,
+                                            ARRAY [id]      AS ancestry,
+                                            NULL :: INTEGER AS parent,
+                                            id              AS start_of_ancestry
+                                        FROM dm.dm_domain
+                                        WHERE
+                                            domainid IS NULL and status = 'N'
+                                        UNION
+                                        SELECT
+                                            child.id                                    AS id,
+                                            array_append(p.ancestry, child.id)          AS ancestry,
+                                            child.domainid                              AS parent,
+                                            coalesce(p.start_of_ancestry, child.domainid) AS start_of_ancestry
+                                        FROM dm.dm_domain child
+                                            INNER JOIN parents p ON p.id = child.domainid AND child.status = 'N'
+                                        )
+                                        SELECT ARRAY_AGG(c)
+                                        FROM
+                                        (SELECT DISTINCT UNNEST(ancestry)
+                                            FROM parents
+                                            WHERE id = (%s) OR (%s) = ANY(parents.ancestry)) AS CT(c)"""
+        
+                        cursor = conn.cursor()  # init cursor
+                        params = tuple([domainid, domainid])
+                        cursor.execute(sql, params)
+                        row = cursor.fetchone()
+                        while row:
+                            result = row[0]
+                            row = cursor.fetchone()
+                    conn.close()
+                return {"domains": result}
+                
+            except (InterfaceError, OperationalError) as ex:
+                if attempt < no_of_retry:
+                    sleep_for = 0.2
+                    logging.error(
+                        "Database connection error: {} - sleeping for {}s"
+                        " and will retry (attempt #{} of {})".format(
+                            ex, sleep_for, attempt, no_of_retry
+                        )
+                    )
+                    #200ms of sleep time in cons. retry calls 
+                    sleep(sleep_for)
+                    attempt += 1
+                    continue
+                else:
+                    raise
 
     except HTTPException:
         raise
