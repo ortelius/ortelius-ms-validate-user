@@ -26,7 +26,7 @@ db_port = os.getenv("DB_PORT", "5432")
 id_rsa_pub = os.getenv("RSA_FILE", "ortelius_rsa.pub")
 public_key = open(id_rsa_pub, 'r').read()
 
-engine = create_engine("postgresql+psycopg2://" + db_user + ":" + db_pass + "@" + db_host + "/" + db_name, pool_pre_ping=True)
+engine = create_engine("postgresql+psycopg2://" + db_user + ":" + db_pass + "@" + db_host + ":" + db_port + "/" + db_name, pool_pre_ping=True)
 
 
 class StatusMsg(BaseModel):
