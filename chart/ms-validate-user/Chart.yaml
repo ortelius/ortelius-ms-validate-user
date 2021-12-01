@@ -14,4 +14,4 @@
 name: ms-validate-user
 description: Dependency Packages
 type: application
-Version: ".21"
+version: ".24"
