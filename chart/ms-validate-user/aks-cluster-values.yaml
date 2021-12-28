@@ -1,11 +1,11 @@
 Chart: chart/ms-validate-user
 ChartNamespace: ortelius
 DockerRepo: quay.io/ortelius/ms-validate-user
-DockerSha: 1514e7b6b93ccf0a2bb0dc3fe4622b4ec867f070528376547865c738c073f93a
-DockerTag: deploy-v10.0.0.28-g88d4fca
+DockerSha: 00c9080f41cb8835ddbe20ed89cc3505d3177dad0037126e74ce33e06cd10f66
+DockerTag: deploy-v10.0.0.29-gf325121
 EXT: sh
 GitBranch: deploy
-GitCommit: 88d4fca
+GitCommit: f325121
 GitRepo: ortelius/ortelius-ms-validate-user
 GitTag: deploy
 GitUrl: git@github.com:ortelius/ortelius-ms-validate-user.git
@@ -16,20 +16,20 @@ aks:
   certificate: /root/.ssh/aks.pem
   cluster: cluster2-aks
   resourcegroup: cluster1-rg
-application: ortelius-devops;10_0_10
-builddate: Wed Dec  1 23:39:57 UTC 2021
-buildid: 8f35a209-cf7d-4c36-b7bb-f58aeb500864
-buildurl: https://console.cloud.google.com/cloud-build/builds/8f35a209-cf7d-4c36-b7bb-f58aeb500864?project=eighth-physics-169321
+application: ortelius-devops;10_0_4
+builddate: Mon Dec 27 20:51:57 UTC 2021
+buildid: 81aa17c8-4ab8-4040-b7f8-7a71758efaa6
+buildurl: https://console.cloud.google.com/cloud-build/builds/81aa17c8-4ab8-4040-b7f8-7a71758efaa6?project=eighth-physics-169321
 chart: chart/ms-validate-user
 chartnamespace: ortelius
 chartpublish: Y
-component: ms-validate-user;deploy;v10_0_0_28_g88d4fca
+component: ms-validate-user;deploy;v10_0_0_29_gf325121
 dockerrepo: quay.io/ortelius/ms-validate-user
-dockersha: 1514e7b6b93ccf0a2bb0dc3fe4622b4ec867f070528376547865c738c073f93a
-dockertag: deploy-v10.0.0.28-g88d4fca
-dropzone: /tmp/tdm.1463.10
+dockersha: 00c9080f41cb8835ddbe20ed89cc3505d3177dad0037126e74ce33e06cd10f66
+dockertag: deploy-v10.0.0.29-gf325121
+dropzone: /tmp/tdm.1481.4
 environment: aks-cluster
-gitcommit: 88d4fca
+gitcommit: f325121
 gitrepo: ortelius/ortelius-ms-validate-user
 gittag: deploy
 giturl: git@github.com:ortelius/ortelius-ms-validate-user.git
