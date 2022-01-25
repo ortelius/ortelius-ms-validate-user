@@ -16,7 +16,7 @@ aks:
   certificate: /root/.ssh/aks.pem
   cluster: cluster2-aks
   resourcegroup: cluster1-rg
-application: ortelius-devops;10_0_18
+application: ortelius-devops;10_0_19
 builddate: Fri Jan 21 05:20:50 UTC 2022
 buildid: ec3e3c89-2895-4581-92b4-36bd9b591513
 buildurl: https://console.cloud.google.com/cloud-build/builds/ec3e3c89-2895-4581-92b4-36bd9b591513?project=eighth-physics-169321
@@ -27,7 +27,7 @@ component: ms-validate-user;deploy;v10_0_0_35_g6ca4cc4
 dockerrepo: quay.io/ortelius/ms-validate-user
 dockersha: 0f60b4b62b2883a95cf28fe950368f1e314476e4ab3e60a4d4166d9e86f9ede0
 dockertag: deploy-v10.0.0.35-g6ca4cc4
-dropzone: /tmp/tdm.1493.4
+dropzone: /tmp/tdm.1498.4
 environment: aks-cluster
 gitcommit: 6ca4cc4
 gitrepo: ortelius/ortelius-ms-validate-user
