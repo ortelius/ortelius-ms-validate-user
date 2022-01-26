@@ -18,7 +18,7 @@
   CustomAction: GLOBAL.HelmChart
   DockerRepo: quay.io/ortelius/ms-validate-user
   DockerSha: 2d375fe9dc09cfa423ebe2ea1f729d935e77225036458088f531e3bc7a6bc46a
-  DockerTag: deploy-v10.0.0.22-gaf180b2
+  DockerTag: deploy-v10.0.0.39-g67ea6ae
   EXT: sh
   GitBranch: deploy
   GitCommit: af180b2
@@ -37,10 +37,10 @@
   buildurl: https://console.cloud.google.com/cloud-build/builds/7c597acf-b89c-4cfa-bcd8-42b3c7937fbe?project=eighth-physics-169321
   chart: chart/ms-validate-user
   chartnamespace: ortelius
-  component: ms-validate-user;deploy;v10_0_0_22_gaf180b2
+  component: ms-validate-user;deploy;v10_0_0_39_g67ea6ae
   dockerrepo: quay.io/ortelius/ms-validate-user
   dockersha: 2d375fe9dc09cfa423ebe2ea1f729d935e77225036458088f531e3bc7a6bc46a
-  dockertag: deploy-v10.0.0.22-gaf180b2
+  dockertag: deploy-v10.0.0.39-g67ea6ae
   dropzone: /tmp/tdm.1210.4
   environment: aks-cluster
   gitcommit: af180b2
