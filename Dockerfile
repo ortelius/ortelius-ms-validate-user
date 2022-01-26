@@ -26,3 +26,4 @@ COPY main.py /app
 COPY requirements.txt /app
 RUN pip install -r requirements.txt; \
 python -m pip uninstall -y pip;
+
