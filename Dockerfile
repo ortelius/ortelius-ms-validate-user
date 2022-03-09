@@ -22,6 +22,11 @@ ENV DB_POST 5432
 
 WORKDIR /app
 
+RUN apk add openssl; \
+    mkdir /app/ssh; \
+    openssl genrsa -out private.pem 2048; \
+    openssl rsa -in private.pem -pubout -out /app/ssh/ortelius_rsa.pub
+ 
 COPY main.py /app
 COPY requirements.txt /app
 RUN pip install -r requirements.txt; \

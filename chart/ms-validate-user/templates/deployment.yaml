@@ -65,11 +65,4 @@ spec:
           ports:
             - name: http
               containerPort: 80
-          volumeMounts:
-            - name: ssh-volume
-              mountPath: /app/ssh
-      volumes:
-        - name: ssh-volume
-          secret:
-            secretName: rsa-pub-secret
 ---   
