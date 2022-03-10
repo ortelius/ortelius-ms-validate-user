@@ -35,8 +35,11 @@ spec:
           image: "{{ .Values.DockerRepo }}:{{ .Values.DockerTag }}"
           imagePullPolicy: Always
           env:
-            - name: RSA_FILE
-              value: /app/ssh/ortelius_rsa.pub
+            - name: JwtPublicKey
+              valueFrom:
+                secretKeyRef:
+                  name: jwtkeys
+                  key: JwtPublicKey        
             - name: DB_USER
               valueFrom:
                 secretKeyRef:

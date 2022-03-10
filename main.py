@@ -37,8 +37,7 @@ db_name = os.getenv("DB_NAME", "postgres")
 db_user = os.getenv("DB_USER", "postgres")
 db_pass = os.getenv("DB_PASS", "postgres")
 db_port = os.getenv("DB_PORT", "5432")
-id_rsa_pub = os.getenv("RSA_FILE", "ortelius_rsa.pub")
-public_key = open(id_rsa_pub, 'r').read()
+public_key = os.getenv("JWT_PUBLIC_KEY", "")
 
 engine = create_engine("postgresql+psycopg2://" + db_user + ":" + db_pass + "@" + db_host + ":" + db_port + "/" + db_name, pool_pre_ping=True)
 
