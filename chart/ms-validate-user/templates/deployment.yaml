@@ -34,12 +34,7 @@ spec:
         - name: {{ include "ms-validate-user.name" . }}
           image: "{{ .Values.DockerRepo }}:{{ .Values.DockerTag }}"
           imagePullPolicy: Always
-          env:
-            - name: JwtPublicKey
-              valueFrom:
-                secretKeyRef:
-                  name: jwtkeys
-                  key: JwtPublicKey        
+          env:    
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
@@ -68,4 +63,11 @@ spec:
           ports:
             - name: http
               containerPort: 80
+          volumeMounts:
+            - name: jwt-volume
+              mountPath: /app
+      volumes:
+        - name: jwt-volume
+          secret:
+            secretName: jwtkeys  
 ---   
