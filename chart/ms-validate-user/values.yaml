@@ -1,52 +1,38 @@
-# Copyright (c) 2021 Linux Foundation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-  BuildNumber: 0
-  Chart: chart/ms-validate-user
-  ChartNamespace: ortelius
-  CustomAction: GLOBAL.HelmChart
-  DockerRepo: quay.io/ortelius/ms-validate-user
-  DockerSha: 2d375fe9dc09cfa423ebe2ea1f729d935e77225036458088f531e3bc7a6bc46a
-  DockerTag: deploy-v10.0.0.39-g67ea6ae
-  EXT: sh
-  GitBranch: deploy
-  GitCommit: af180b2
-  GitRepo: ortelius/ortelius-ms-validate-user
-  GitTag: deploy
-  GitUrl: git@github.com:ortelius/ortelius-ms-validate-user.git
-  RE_PHYSICAL_HOSTNAME: localhost
-  RE_PHYSICAL_SERVER: localhost
-  aks:
-    admin: true
-    cluster: cluster2-aks
-    resourcegroup: cluster1-rg
-  application: ortelius-devops
-  builddate: Fri Sep 10 21:08:00 UTC 2021
-  buildid: 7c597acf-b89c-4cfa-bcd8-42b3c7937fbe
-  buildurl: https://console.cloud.google.com/cloud-build/builds/7c597acf-b89c-4cfa-bcd8-42b3c7937fbe?project=eighth-physics-169321
-  chart: chart/ms-validate-user
-  chartnamespace: ortelius
-  component: ms-validate-user;deploy;v10_0_0_39_g67ea6ae
-  dockerrepo: quay.io/ortelius/ms-validate-user
-  dockersha: 2d375fe9dc09cfa423ebe2ea1f729d935e77225036458088f531e3bc7a6bc46a
-  dockertag: deploy-v10.0.0.39-g67ea6ae
-  dropzone: /tmp/tdm.1210.4
-  environment: aks-cluster
-  gitcommit: af180b2
-  gitrepo: ortelius/ortelius-ms-validate-user
-  gittag: deploy
-  giturl: git@github.com:ortelius/ortelius-ms-validate-user.git
-  kubectl_context: cluster2-aks-admin
-  server_hostname: localhost
-  server_name: localhost
+BuildNumber: 0
+Chart: chart/ms-validate-user
+ChartNamespace: ortelius
+CustomAction: GLOBAL.HelmChart
+DockerRepo: quay.io/ortelius/ms-validate-user
+DockerSha: ebba0d345aa1
+DockerTag: deploy-v10.0.0.54-g58ed74d
+EXT: sh
+GitBranch: deploy
+GitCommit: 58ed74d
+GitRepo: ortelius/ortelius-ms-validate-user
+GitTag: deploy
+GitUrl: https://github.com/ortelius/ortelius-ms-validate-user.git
+RE_PHYSICAL_HOSTNAME: localhost
+RE_PHYSICAL_SERVER: localhost
+aks:
+  admin: true
+  cluster: cluster2-aks
+  resourcegroup: cluster1-rg
+application: ortelius;10_0_0
+builddate: Thu Mar 17 16:32:35 2022
+buildid: 4005f572-4f22-4920-933a-0616812f8584
+buildurl: https://console.cloud.google.com/cloud-build/builds/4005f572-4f22-4920-933a-0616812f8584?project=eighth-physics-169321
+chart: chart/ms-validate-user
+chartnamespace: ortelius
+component: ms-validate-user;deploy;v10_0_0_54_g58ed74d
+dockerrepo: quay.io/ortelius/ms-validate-user
+dockersha: ebba0d345aa1
+dockertag: deploy-v10.0.0.54-g58ed74d
+dropzone: /tmp/tdm.1543.6
+environment: aks-cluster
+gitcommit: 58ed74d
+gitrepo: ortelius/ortelius-ms-validate-user
+gittag: deploy
+giturl: https://github.com/ortelius/ortelius-ms-validate-user.git
+kubectl_context: cluster2-aks-admin
+server_hostname: localhost
+server_name: localhost
