@@ -59,6 +59,19 @@ steps:
         docker build --tag $$COMPONENT_DOCKERREPO:$$IMAGE_TAG -f /workspace/Dockerfile .; \
         docker push $$COMPONENT_DOCKERREPO:$$IMAGE_TAG
 
+  #syft scan
+  - name: 'gcr.io/cloud-builders/docker'
+    id: scan
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        source /workspace/cloudbuild.sh; \
+        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin; \
+        echo $$COMPONENT_DOCKERREPO:$$IMAGE_TAG; \
+        syft packages $$COMPONENT_DOCKERREPO:$$IMAGE_TAG --scope all-layers -o cyclonedx-json > /workspace/cyclonedx.json; \
+        cat /workspace/cyclonedx.json;
+
   # Get image id
   - name: 'gcr.io/cloud-builders/docker'
     id: digest
@@ -79,7 +92,7 @@ steps:
       - |
         pip install deployhub | grep -i deployhub; \
         source /workspace/cloudbuild.sh; \
-        dh updatecomp --rsp /workspace/component.toml
+        dh updatecomp --rsp /workspace/component.toml --deppkg "cyclonedx@/workspace/cyclonedx.json";
 
 secrets:
 - kmsKeyName: projects/eighth-physics-169321/locations/global/keyRings/cli/cryptoKeys/quay
