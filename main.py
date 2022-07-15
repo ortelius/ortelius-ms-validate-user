@@ -20,7 +20,7 @@ import psycopg2
 from sqlalchemy import create_engine
 from fastapi import FastAPI, Query, Request, Response, HTTPException, status
 from pydantic import BaseModel
-from sqlalchemy.exc import OperationalError, StatementError
+from sqlalchemy.exc import InterfaceError, OperationalError, StatementError
 from time import sleep
 import logging
 
@@ -130,6 +130,7 @@ async def validateuser(request: Request, domains: Optional[str] = Query(None, re
     uuid = ''                                  # init uuid to blank
 
     token = request.cookies.get('token', None)  # get the login token from the cookies
+    print(token)
     if (token is None):                        # no token the fail
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization Failed")
     try:
