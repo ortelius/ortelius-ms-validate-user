@@ -154,7 +154,7 @@ async def validateuser(request: Request, domains: Optional[str] = Query(None, re
                     conn = connection.connection
                     authorized = False      # init to not authorized
         
-                    csql = "DELETE from dm.dm_user_auth where lastseen < current_timestamp - interval '1 hours'"  # remove stale logins
+                    csql = "DELETE from dm.dm_user_auth where lastseen < current_timestamp at time zone 'UTC' - interval '1 hours'"  # remove stale logins
                     sql = "select count(*) from dm.dm_user_auth where id = (%s) and jti = (%s)"  # see if the user id authorized
         
                     cursor = conn.cursor()  # init cursor
@@ -175,7 +175,7 @@ async def validateuser(request: Request, domains: Optional[str] = Query(None, re
         
                     if (rowcnt > 0):            # > 0 means that user is authorized
                         authorized = True       # set authorization to True
-                        usql = "update dm.dm_user_auth set lastseen = current_timestamp where id = (%s) and jti = (%s)"  # sql to update the last seen timestamp
+                        usql = "update dm.dm_user_auth set lastseen = current_timestamp at time zone 'UTC' where id = (%s) and jti = (%s)"  # sql to update the last seen timestamp
                         params = tuple([userid, uuid])       # setup parameters to update query
                         cursor = conn.cursor()          # init cursor
                         cursor.execute(usql, params)    # run the query
