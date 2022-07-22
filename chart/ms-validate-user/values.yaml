@@ -3,7 +3,7 @@ Chart: chart/ms-validate-user
 ChartNamespace: ortelius
 CustomAction: GLOBAL.HelmChart
 DockerRepo: quay.io/ortelius/ms-validate-user
-DockerSha: f9c4c7f66903
+DockerSha: 9d17b931bca9
 DockerTag: deploy-v10.0.0.68-g6b08a2a
 EXT: sh
 GitBranch: deploy
@@ -18,16 +18,16 @@ aks:
   cluster: cluster2-aks
   resourcegroup: cluster1-rg
 application: ortelius;10_0_0
-builddate: Fri Jul 22 16:54:21 2022
-buildid: 0b7978d3-e5fe-4f50-a0e8-3182fe2a3420
-buildurl: https://console.cloud.google.com/cloud-build/builds/0b7978d3-e5fe-4f50-a0e8-3182fe2a3420?project=eighth-physics-169321
+builddate: Fri Jul 22 16:58:33 2022
+buildid: 438da77b-4f61-414e-ac63-0d105c07072d
+buildurl: https://console.cloud.google.com/cloud-build/builds/438da77b-4f61-414e-ac63-0d105c07072d?project=eighth-physics-169321
 chart: chart/ms-validate-user
 chartnamespace: ortelius
 component: ms-validate-user;deploy;v10_0_0_68_g6b08a2a
 dockerrepo: quay.io/ortelius/ms-validate-user
-dockersha: f9c4c7f66903
+dockersha: 9d17b931bca9
 dockertag: deploy-v10.0.0.68-g6b08a2a
-dropzone: /tmp/tdm.1734.9
+dropzone: /tmp/tdm.1735.9
 environment: aks-cluster
 gitcommit: 6b08a2a
 gitrepo: ortelius/ortelius-ms-validate-user
